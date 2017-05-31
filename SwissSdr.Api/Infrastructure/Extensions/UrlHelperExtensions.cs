@@ -14,17 +14,18 @@ namespace SwissSdr.Api
 {
     public static class UrlHelperExtensions
     {
-        /// <summary>
-        /// Generates an absolute URL using the specified route name and <see cref="Expression{TDelegate}"/> for an action method,
-        /// from which action name, controller name and route values are resolved.
-        /// </summary>
-        /// <typeparam name="TController">Controller, from which the action is specified.</typeparam>
-        /// <param name="action">
-        /// The <see cref="Expression{TDelegate}"/>, from which action name, 
-        /// controller name and route values are resolved.
-        /// </param>
-        /// <returns>The generated absolute URL.</returns>
-        public static string Link<TController>(this IUrlHelper helper, Expression<Action<TController>> action) where TController : class
+		/// <summary>
+		/// Generates an absolute URL using the specified route name and <see cref="Expression{TDelegate}"/> for an action method,
+		/// from which action name, controller name and route values are resolved.
+		/// </summary>
+		/// <typeparam name="TController">Controller, from which the action is specified.</typeparam>
+		/// <param name="helper"></param>
+		/// <param name="action">
+		/// The <see cref="Expression{TDelegate}"/>, from which action name, 
+		/// controller name and route values are resolved.
+		/// </param>
+		/// <returns>The generated absolute URL.</returns>
+		public static string Link<TController>(this IUrlHelper helper, Expression<Action<TController>> action) where TController : class
 		{
             return helper.Link(action, null);
 		}
@@ -38,6 +39,7 @@ namespace SwissSdr.Api
 		/// from which action name, controller name and route values are resolved, and the specified additional route values.
 		/// </summary>
 		/// <typeparam name="TController">Controller, from which the action is specified.</typeparam>
+		/// <param name="helper"></param>
 		/// <param name="action">
 		/// The <see cref="Expression{TDelegate}"/>, from which action name, 
 		/// controller name and route values are resolved.
