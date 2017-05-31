@@ -14,6 +14,7 @@ namespace SwissSdr.Api.Resources
 		public string Title { get; set; }
 		public string Fullname { get; set; }
 		public string EMail { get; set; }
+		public IEnumerable<string> LoginProviders { get; set; }
 		public string ThumbnailUrl { get; set; }
 	}
 }
