@@ -12,20 +12,20 @@ using System.Globalization;
 
 namespace SwissSdr.Api.InputModels
 {
-    public class ProjectsFilterInputModel : IQueryCreator<Indexes.Project_Filter.Result>, IQueryValueProvider
+	public class ProjectsFilterInputModel : IQueryCreator<Indexes.Project_Filter.Result>, IQueryValueProvider
 	{
 		public string Query { get; set; }
 
 		public IEnumerable<string> Tags { get; set; }
 
-        public ProjectPhase? Phase { get; set; }
-        public DateTime? Begin { get; set; }
-        public DateTime? End { get; set; }
+		public IEnumerable<ProjectPhase> Phases { get; set; }
+		public DateTime? Begin { get; set; }
+		public DateTime? End { get; set; }
 
-        public string AssociatedEntity { get; set; }
-        public string AssociationDescription { get; set; }
+		public string AssociatedEntity { get; set; }
+		public string AssociationDescription { get; set; }
 
-        public bool? HasJobs { get; set; }
+		public bool? HasJobs { get; set; }
 
 		public SortOptions? Sort { get; set; }
 
@@ -43,9 +43,9 @@ namespace SwissSdr.Api.InputModels
 				query = query.Where(x => x.Tags.ContainsAll(Tags));
 			}
 
-			if (Phase.HasValue)
+			if (Phases != null && Phases.Any())
 			{
-				query = query.Where(x => x.Phase == Phase);
+				query = query.Where(x => x.Phase.In(Phases));
 			}
 
 			if (Begin.HasValue)
@@ -113,9 +113,9 @@ namespace SwissSdr.Api.InputModels
 				values.Add(nameof(Tags).ToCamelCase(), Tags);
 			}
 
-			if (Phase.HasValue)
+			if (Phases != null && Phases.Any())
 			{
-				values.Add(nameof(Phase).ToCamelCase(), Phase);
+				values.Add(nameof(Phases).ToCamelCase(), Phases);
 			}
 
 			if (Begin.HasValue)
