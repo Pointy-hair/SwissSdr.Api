@@ -33,7 +33,8 @@ namespace SwissSdr.Api.Mapping
 							Name = new Multilingual<string>(new LocalizedValue<string>("avatar"))
 						}.GetImageUrl(ImageSize.Thumbnail);
 					}
-				}));
+				}))
+				.ForMember(r => r.LoginProviders, opt => opt.Ignore());
 
 			CreateMap<UserUpdateInputModel, User>()
 				.ForMember(r => r.Id, opt => opt.Ignore())

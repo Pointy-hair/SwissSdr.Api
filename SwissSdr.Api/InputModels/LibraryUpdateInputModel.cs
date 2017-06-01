@@ -75,7 +75,7 @@ namespace SwissSdr.Api.InputModels
 					var filesNotFound = files.Zip(items, (f, i) => new { Id = i.FileId, Exists = f != null }).Where(x => !x.Exists);
 					return !filesNotFound.Any();
 				})
-				.WithMessage($"Could not find all referenced files.");
+				.WithMessage("Could not find all referenced files.");
 		}
 	}
 

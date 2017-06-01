@@ -45,7 +45,7 @@ namespace SwissSdr.Api.Controllers
 			_mapper = mapper;
 			_resourceFactory = resourceFactory;
 		}
-		
+
 		[HttpGet]
 		[ProducesResponse(typeof(ItemsResource<UserSummaryResource>), HttpStatusCode.OK)]
 		[ProducesResponse(HttpStatusCode.Forbidden)]
@@ -56,17 +56,22 @@ namespace SwissSdr.Api.Controllers
 				filter = new UsersFilterInputModel();
 			}
 
-			RavenQueryStatistics statistics;
 			var users = await _session.QueryFrom(filter)
-				.Statistics(out statistics)
+				.Statistics(out RavenQueryStatistics statistics)
 				.Paged(skip, take)
 				.As<User>()
 				.ToListAsync();
 
-			var representation = _resourceFactory.CreatePagedCollectionResource<UserSummaryResource, User, UsersController>(
-				users, skip, take, statistics.TotalResults,
-				(s, t) => _ => GetUsers(s, t, filter),
-				u => _ => GetUser(_session.GetIdValuePart(u.Id)));
+			var appSettings = await _session.LoadAsync<AppSettings>(AppSettings.AppSettingsId);
+			if (appSettings == null)
+			{
+				throw new InvalidOperationException("Could not load AppSettings");
+			}
+
+			var summaryRepresentations = users.Select(u => CreateUserSummaryResource(u, appSettings));
+			var representation = _resourceFactory.CreatePagedCollectionResource<UsersController>(
+				summaryRepresentations, skip, take, statistics.TotalResults,
+				(s, t) => _ => GetUsers(s, t, filter));
 
 			return Ok(representation);
 		}
@@ -338,7 +343,7 @@ namespace SwissSdr.Api.Controllers
 			{
 				throw new ApiException("Could not find all of the objects for which permissions were to be set.");
 			}
-			
+
 			foreach (var entity in entities)
 			{
 				var updatedPermissions = updateModel.Items.SingleOrDefault(i => i.EntityId == entity.Id);
@@ -356,10 +361,17 @@ namespace SwissSdr.Api.Controllers
 
 			await _session.SaveChangesAsync();
 		}
+		
+		private HALResponse CreateUserSummaryResource(User model, AppSettings settings)
+		{
+			var resource = _mapper.Map<UserSummaryResource>(model);
+			resource.LoginProviders = model.Logins.Select(l => l.GetFriendlyName(settings));
+
+			return new HALResponse(resource);
+		}
 
 		private async Task<HALResponse> CreateUserResource(User model)
 		{
-			var id = _session.GetIdValuePart(model.Id);
 			var resource = _mapper.Map<UserResource>(model);
 			var representation = new HALResponse(resource);
 
@@ -375,27 +387,16 @@ namespace SwissSdr.Api.Controllers
 			var appSettings = await _session.LoadAsync<AppSettings>(AppSettings.AppSettingsId);
 			foreach (var login in model.Logins)
 			{
-				resource.Logins.Add(CreateUserLoginResourceItem(login, appSettings.LoginSettings.Providers));
+				resource.Logins.Add(new UserLoginResourceItem()
+				{
+					Provider = login.Provider,
+					UserId = login.UserId,
+					FriendlyName = login.GetFriendlyName(appSettings),
+					RemovalUrlTemplate = login.GetRemovalUrl(SwissSdrConstants.Authority)
+				});
 			}
 
 			return representation;
-		}
-
-		private UserLoginResourceItem CreateUserLoginResourceItem(UserLogin login, IEnumerable<LoginProvider> providers)
-		{
-			var matchingProvider = providers.SingleOrDefault(p => p.Provider == login.Provider || p.Provider == login.AuthenticateVia);
-			if (matchingProvider == null)
-			{
-				throw new InvalidOperationException($"Could not find login provider '{login.Provider}' in AppSettings.");
-			}
-
-			return new UserLoginResourceItem()
-			{
-				Provider = login.Provider,
-				UserId = login.UserId,
-				FriendlyName = login.GetFriendlyName(matchingProvider),
-				RemovalUrlTemplate = login.GetRemovalUrl(SwissSdrConstants.Authority)
-			};
 		}
 	}
 }

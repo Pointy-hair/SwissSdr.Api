@@ -15,7 +15,5 @@ namespace SwissSdr.Datamodel
 		public string Email { get; set; }
 
 		public string GetRemovalUrl(string authority) => $"{authority}/Account/RemoveExternalLogin?provider={Uri.EscapeDataString(Provider)}&userId={Uri.EscapeDataString(UserId)}&returnUrl={{returnUrl}}";
-
-		public string GetFriendlyName(LoginProvider providerDefinition) => $"{providerDefinition.FriendlyName} ({Email})";
 	}
 }

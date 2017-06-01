@@ -122,7 +122,12 @@ namespace SwissSdr.Api
 			}
 
 			app.UseCors(options => options
-				.WithOrigins("https://swiss-sdr.ch", "https://www.swiss-sdr.ch", "https://app.swiss-sdr.ch", "https://swisssdr-development.azurewebsites.net", "https://swisssdr.novu.io:3000")
+				.WithOrigins("https://swiss-sdr.ch", 
+					"https://www.swiss-sdr.ch", 
+					"https://app.swiss-sdr.ch", 
+					"https://swisssdr-development.azurewebsites.net", 
+					"https://swisssdr.novu.io:3000", 
+					"https://swisssdr.novu.io")
 				.WithExposedHeaders("Location")
 				.AllowAnyMethod()
 				.AllowAnyHeader()
